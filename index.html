@@ -1,0 +1,1299 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+    <meta name="theme-color" content="#176b3a">
+
+    <meta name="description" content="Gestion du dépôt avicole MARONE">
+
+    <title>Dépôt & Aviculture</title>
+
+    <link rel="stylesheet" href="css/style.css">
+
+    <!-- ================= PWA ================= -->
+    <link rel="manifest" href="manifest.json">
+
+    <!-- Icônes (Android / bureau) -->
+    <link rel="icon" type="image/png" sizes="192x192" href="assets/icons/icon-192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="assets/icons/icon-512.png">
+
+    <!-- Icône iOS (ajout à l'écran d'accueil) -->
+    <link rel="apple-touch-icon" href="assets/icons/icon-180.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Dépôt MARONE">
+</head>
+
+<body>
+
+    <!-- =====================================================
+         EN-TÊTE
+    ====================================================== -->
+
+    <header class="app-header" style="display:flex; align-items:center; justify-content:space-between; gap:12px;">
+
+        <div>
+
+            <p class="app-header__titre">
+                🌾 Dépôt & Aviculture
+            </p>
+
+            <p class="app-header__soustitre">
+                Gestion du Dépôt MARONE
+            </p>
+
+        </div>
+
+        <button class="btn-icone" title="Réglages" onclick="ouvrirParametres()" style="align-self:center;">
+
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22">
+
+                <circle cx="12" cy="12" r="3" />
+
+                <path
+                    d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z" />
+
+            </svg>
+
+        </button>
+
+    </header>
+
+
+    <!-- =====================================================
+         CONTENU PRINCIPAL
+    ====================================================== -->
+
+    <main class="app-main">
+
+
+        <!-- =================================================
+             TABLEAU DE BORD
+        ================================================== -->
+
+        <section id="vue-tableau" class="vue actif">
+
+            <h2 class="vue__titre">
+                Tableau de bord
+            </h2>
+
+
+            <div class="grille-stats">
+
+                <div class="carte-stat">
+
+                    <div class="carte-stat__valeur" id="stat-nb-produits">
+                        0
+                    </div>
+
+                    <div class="carte-stat__label">
+                        Produits
+                    </div>
+
+                </div>
+
+
+                <div class="carte-stat">
+
+                    <div class="carte-stat__valeur" id="stat-alertes">
+                        0
+                    </div>
+
+                    <div class="carte-stat__label">
+                        Alertes stock
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- VACCINATIONS À SURVEILLER (en haut, bien visible) -->
+
+            <div class="section-espace">
+
+                <div class="ligne-titre-action">
+
+                    <h3>
+                        Vaccinations à surveiller
+                    </h3>
+
+                </div>
+
+                <div class="carte" id="liste-vaccinations-alertes">
+                </div>
+
+            </div>
+
+
+            <!-- COMMANDES DE POUSSINS À LIVRER -->
+
+            <div class="section-espace">
+
+                <div class="ligne-titre-action">
+
+                    <h3>
+                        Poussins à livrer
+                    </h3>
+
+                </div>
+
+                <div class="carte" id="liste-poussins-alertes">
+                </div>
+
+            </div>
+
+
+            <!-- VALEUR STOCK -->
+
+            <div class="carte">
+
+                <div class="texte-secondaire" style="margin-bottom:4px;">
+
+                    Valeur totale du stock
+
+                </div>
+
+                <div id="stat-valeur-stock" style="
+                        font-size:22px;
+                        font-weight:800;
+                        color:var(--vert-fonce);
+                    ">
+
+                    0 F
+
+                </div>
+
+            </div>
+
+
+            <!-- CHIFFRE AFFAIRES -->
+
+            <div class="carte">
+
+                <div class="texte-secondaire" style="margin-bottom:4px;">
+
+                    Chiffre d'affaires du jour
+
+                </div>
+
+                <div id="stat-ca-jour" style="
+                        font-size:22px;
+                        font-weight:800;
+                        color:var(--vert-fonce);
+                    ">
+
+                    0 F
+
+                </div>
+
+            </div>
+
+
+            <!-- CRÉANCES -->
+
+            <div class="carte">
+
+                <div class="texte-secondaire" style="margin-bottom:4px;">
+
+                    Créances clients
+
+                </div>
+
+                <div id="stat-creances" style="
+                        font-size:22px;
+                        font-weight:800;
+                        color:#b54a3f;
+                    ">
+
+                    0 F
+
+                </div>
+
+            </div>
+
+
+            <!-- ALERTES -->
+
+            <div class="section-espace">
+
+                <div class="ligne-titre-action">
+
+                    <h3>
+                        Alertes de stock bas
+                    </h3>
+
+                </div>
+
+                <div class="carte" id="liste-alertes">
+                </div>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- =================================================
+             PRODUITS
+        ================================================== -->
+
+        <section id="vue-produits" class="vue">
+
+            <h2 class="vue__titre">
+                Produits
+            </h2>
+
+            <div class="carte" id="liste-produits">
+            </div>
+
+        </section>
+
+
+
+        <!-- =================================================
+             APPROVISIONNEMENTS
+        ================================================== -->
+
+        <section id="vue-approvisionnements" class="vue">
+
+            <h2 class="vue__titre">
+                Réapprovisionnements
+            </h2>
+
+            <div class="carte" id="liste-approvisionnements">
+            </div>
+
+        </section>
+
+
+
+        <!-- =================================================
+             VENTES
+        ================================================== -->
+
+        <section id="vue-ventes" class="vue">
+
+            <div class="ligne-titre-action">
+
+                <h2 class="vue__titre">
+                    Ventes
+                </h2>
+
+            </div>
+
+
+            <div class="grille-stats">
+
+                <div class="carte-stat">
+
+                    <div class="carte-stat__valeur" id="stat-ca-total">
+
+                        0
+
+                    </div>
+
+                    <div class="carte-stat__label">
+                        Chiffre d'affaires
+                    </div>
+
+                </div>
+
+
+                <div class="carte-stat">
+
+                    <div class="carte-stat__valeur" id="stat-marge">
+
+                        0
+
+                    </div>
+
+                    <div class="carte-stat__label">
+                        Marge
+                    </div>
+
+                </div>
+
+
+                <div class="carte-stat">
+
+                    <div class="carte-stat__valeur" id="stat-resultat-net">
+
+                        0
+
+                    </div>
+
+                    <div class="carte-stat__label">
+                        Résultat net
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="section-espace">
+
+                <div class="ligne-titre-action">
+
+                    <h3>
+                        Marge par produit
+                    </h3>
+
+                </div>
+
+                <div class="carte" id="liste-marge-produits">
+                </div>
+
+            </div>
+
+
+            <div class="carte">
+
+                <div class="ligne-titre-action">
+
+                    <h3>
+                        Historique des ventes
+                    </h3>
+
+                </div>
+
+                <div id="liste-ventes">
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             DÉPENSES
+        ================================================== -->
+
+        <section id="vue-depenses" class="vue">
+
+            <div class="ligne-titre-action">
+
+                <h2 class="vue__titre">
+                    Dépenses
+                </h2>
+
+            </div>
+
+
+            <!-- TOTAL DES DÉPENSES -->
+
+            <div class="carte">
+
+                <div class="texte-secondaire" style="margin-bottom:4px;">
+
+                    Total des dépenses
+
+                </div>
+
+                <div id="total-depenses" style="
+                font-size:22px;
+                font-weight:800;
+                color:#b54a3f;
+            ">
+
+                    0 F
+
+                </div>
+
+            </div>
+
+
+            <!-- LISTE DES DÉPENSES -->
+
+            <div class="section-espace">
+
+                <div class="ligne-titre-action">
+
+                    <h3>
+                        Historique des dépenses
+                    </h3>
+
+                </div>
+
+                <div class="carte" id="liste-depenses">
+                </div>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- =================================================
+             CLIENTS
+        ================================================== -->
+
+        <section id="vue-clients" class="vue">
+
+            <h2 class="vue__titre">
+                Clients
+            </h2>
+
+
+            <div class="carte">
+
+                <div class="texte-secondaire" style="margin-bottom:4px;">
+
+                    Total des créances
+
+                </div>
+
+                <div id="stat-creances-clients" style="
+                        font-size:22px;
+                        font-weight:800;
+                        color:#b54a3f;
+                    ">
+
+                    0 F
+
+                </div>
+
+            </div>
+
+
+            <div class="carte">
+
+                <div id="liste-clients">
+                </div>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- =================================================
+             CATÉGORIES
+        ================================================== -->
+
+        <section id="vue-categories" class="vue">
+
+            <h2 class="vue__titre">
+                Catégories
+            </h2>
+
+            <div class="carte" id="liste-categories">
+            </div>
+
+        </section>
+
+
+
+        <!-- =================================================
+             ÉLEVAGE / POULAILLERS
+        ================================================== -->
+
+        <section id="vue-elevage" class="vue">
+
+            <div class="ligne-titre-action">
+
+                <h2 class="vue__titre">
+                    Poulaillers
+                </h2>
+
+            </div>
+
+
+            <div class="grille-stats">
+
+                <div class="carte-stat">
+
+                    <div class="carte-stat__valeur" id="elevage-total-bandes">
+                        0
+                    </div>
+
+                    <div class="carte-stat__label">
+                        Bandes
+                    </div>
+
+                </div>
+
+
+                <div class="carte-stat">
+
+                    <div class="carte-stat__valeur" id="elevage-bandes-en-cours">
+                        0
+                    </div>
+
+                    <div class="carte-stat__label">
+                        En cours
+                    </div>
+
+                </div>
+
+
+                <div class="carte-stat">
+
+                    <div class="carte-stat__valeur" id="elevage-effectif-total">
+                        0
+                    </div>
+
+                    <div class="carte-stat__label">
+                        Effectif total
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="champ">
+
+                <label>Filtrer par statut</label>
+
+                <select id="filtre-statut-bandes" onchange="ElevageUI.chargerBandes()">
+
+                    <option value="">
+                        Toutes les bandes
+                    </option>
+
+                    <option value="EN_COURS">
+                        En cours
+                    </option>
+
+                    <option value="TERMINEE">
+                        Terminées
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <div class="carte">
+
+                <div id="liste-bandes">
+                </div>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- =================================================
+             POUSSINS (ACHAT / REVENTE)
+        ================================================== -->
+
+        <section id="vue-poussins" class="vue">
+
+            <div class="ligne-titre-action">
+
+                <h2 class="vue__titre">
+                    Poussins
+                </h2>
+
+            </div>
+
+
+            <div class="grille-stats">
+
+                <div class="carte-stat">
+                    <div class="carte-stat__valeur" id="poussins-ca">0 F</div>
+                    <div class="carte-stat__label">Chiffre d'affaires</div>
+                </div>
+
+                <div class="carte-stat">
+                    <div class="carte-stat__valeur" id="poussins-resultat">0 F</div>
+                    <div class="carte-stat__label">Résultat</div>
+                </div>
+
+            </div>
+
+            <div class="grille-stats">
+
+                <div class="carte-stat">
+                    <div class="carte-stat__valeur" id="poussins-cout-achat">0 F</div>
+                    <div class="carte-stat__label">Coût / poussin</div>
+                </div>
+
+                <div class="carte-stat">
+                    <div class="carte-stat__valeur" id="poussins-prix-vente">0 F</div>
+                    <div class="carte-stat__label">Prix vente / poussin</div>
+                </div>
+
+                <div class="carte-stat">
+                    <div class="carte-stat__valeur" id="poussins-marge">0 F</div>
+                    <div class="carte-stat__label">Marge / poussin</div>
+                </div>
+
+            </div>
+
+            <div class="carte">
+                <div class="texte-secondaire" style="margin-bottom:4px;">
+                    Créances en cours (ventes à crédit)
+                </div>
+                <div id="poussins-creances" style="font-size:20px; font-weight:800; color:#B54A3F;">
+                    0 F
+                </div>
+            </div>
+
+
+            <div class="section-espace">
+
+                <div class="ligne-titre-action">
+                    <h3>Commandes</h3>
+                </div>
+
+                <div class="carte" id="liste-commandes-poussins">
+                </div>
+
+            </div>
+
+
+            <div class="section-espace">
+
+                <div class="ligne-titre-action">
+                    <h3>Ventes</h3>
+                </div>
+
+                <div class="carte" id="liste-ventes-poussins">
+                </div>
+
+            </div>
+
+        </section>
+
+
+    </main>
+
+
+
+
+    <!-- =====================================================
+         BOUTON FLOTTANT +
+    ====================================================== -->
+
+    <button class="btn-flottant" id="btn-ajout-flottant" onclick="actionAjoutContextuel()" aria-label="Ajouter">
+
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+
+            <path d="M12 5v14M5 12h14" />
+
+        </svg>
+
+    </button>
+
+
+
+    <!-- =====================================================
+         NAVIGATION BASSE
+    ====================================================== -->
+
+    <nav class="nav-basse">
+
+
+        <!-- ACCUEIL -->
+
+        <button class="nav-basse__item actif" id="nav-tableau" onclick="allerVers('tableau')">
+
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+
+                <rect x="3" y="3" width="10" height="9" rx="1.5" />
+
+                <rect x="14" y="3" width="10" height="5" rx="1.5" />
+
+                <rect x="14" y="12" width="10" height="9" rx="1.5" />
+
+                <rect x="3" y="16" width="10" height="5" rx="1.5" />
+
+            </svg>
+
+            Accueil
+
+        </button>
+
+
+
+        <!-- PRODUITS -->
+
+        <button class="nav-basse__item" id="nav-produits" onclick="allerVers('produits')">
+
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+
+                <path d="M20 7 12 3 4 7v10l8 4 8-4V7Z" />
+
+                <path d="M4 7l8 4 8-4M12 11v10" />
+
+            </svg>
+
+            Produits
+
+        </button>
+
+
+
+        <!-- STOCK -->
+
+        <button class="nav-basse__item" id="nav-approvisionnements" onclick="allerVers('approvisionnements')">
+
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+
+                <path d="M21 8V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v2" />
+
+                <path d="M3 8h18v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8Z" />
+
+                <path d="M9 12h6" />
+
+            </svg>
+
+            Stock
+
+        </button>
+
+
+
+        <!-- VENTES -->
+
+        <button class="nav-basse__item" id="nav-ventes" onclick="allerVers('ventes')">
+
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+
+                <path d="M6 2h12v20l-6-3-6 3V2Z" />
+
+                <path d="M9 7h6M9 11h6M9 15h3" />
+
+            </svg>
+
+            Ventes
+
+        </button>
+
+
+        <!-- DÉPENSES -->
+
+        <button class="nav-basse__item" id="nav-depenses" onclick="allerVers('depenses')">
+
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+
+                <path d="M12 2v20" />
+
+                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7H14.5a3.5 3.5 0 0 1 0 7H7" />
+
+            </svg>
+
+            Dépenses
+
+        </button>
+
+
+
+        <!-- CLIENTS -->
+
+        <button class="nav-basse__item" id="nav-clients" onclick="allerVers('clients')">
+
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+
+                <circle cx="9" cy="8" r="4" />
+
+                <path d="M3 21v-2a6 6 0 0 1 12 0v2" />
+
+                <path d="M16 4.5a4 4 0 0 1 0 7.5" />
+
+                <path d="M21 21v-2a6 6 0 0 0-4-5.65" />
+
+            </svg>
+
+            Clients
+
+        </button>
+
+
+
+        <!-- CATÉGORIES -->
+
+        <button class="nav-basse__item" id="nav-categories" onclick="allerVers('categories')">
+
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+
+                <rect x="3" y="3" width="8" height="8" rx="1.5" />
+
+                <rect x="13" y="3" width="8" height="8" rx="1.5" />
+
+                <rect x="3" y="13" width="8" height="8" rx="1.5" />
+
+                <rect x="13" y="13" width="8" height="8" rx="1.5" />
+
+            </svg>
+
+            Catégories
+
+        </button>
+
+
+
+        <!-- ÉLEVAGE -->
+
+        <button class="nav-basse__item" id="nav-elevage" onclick="allerVers('elevage')">
+
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+
+                <path d="M8 10c-2 0-3.5 1.6-3.5 3.5S6 17 8 17h6c2.5 0 4.5-2 4.5-4.5S16.5 8 14 8" />
+
+                <path d="M14 8c0-1.7 1.3-3 3-3 .3 0 .6.6.3 1.2C16.8 7 16 7.5 16 8.5" />
+
+                <path d="M17.5 5.5 19 4" />
+
+                <circle cx="11" cy="11" r="0.8" fill="currentColor" stroke="none" />
+
+                <path d="M6 17v2.5" />
+
+                <path d="M11 17.5V20" />
+
+                <path d="M4.5 20h3M9.5 20h3" />
+
+            </svg>
+
+            Poulaillers
+
+        </button>
+
+
+
+        <!-- POUSSINS -->
+
+        <button class="nav-basse__item" id="nav-poussins" onclick="allerVers('poussins')">
+
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+
+                <ellipse cx="12" cy="14" rx="6" ry="5" />
+
+                <path d="M12 9c0-2 1.5-3.5 3-3.5" />
+
+                <circle cx="15.5" cy="5.5" r="1" fill="currentColor" stroke="none" />
+
+                <path d="M9.5 12.5c-.5-.5-1.5-.3-1.5.5" />
+
+            </svg>
+
+            Poussins
+
+        </button>
+
+
+    </nav>
+
+
+
+    <!-- =====================================================
+         MODALE
+    ====================================================== -->
+
+    <div class="modale-fond" id="modale-fond" onclick="if(event.target === this) fermerModale()">
+
+        <div class="modale" id="modale-contenu">
+        </div>
+
+    </div>
+
+
+
+    <!-- =====================================================
+         MODALE — BANDE (ÉLEVAGE)
+         Système de modale dédié à ElevageUI, indépendant
+         de la modale générique ci-dessus.
+    ====================================================== -->
+
+    <div class="modale-fond" id="modale-bande" onclick="if(event.target === this) ElevageUI.fermerModale()">
+
+        <div class="modale">
+
+            <div class="modale__entete">
+
+                <span class="modale__titre" id="titre-modale-bande">
+                    Nouvelle bande
+                </span>
+
+                <button class="modale__fermer" onclick="ElevageUI.fermerModale()">
+                    ✕
+                </button>
+
+            </div>
+
+            <form id="form-bande" onsubmit="ElevageUI.enregistrerBande(event)">
+
+                <input type="hidden" id="bande-id">
+
+                <div class="champ">
+
+                    <label>Code de la bande</label>
+
+                    <input type="text" id="bande-code" placeholder="Ex : B2026-01" required>
+
+                </div>
+
+                <div class="champ">
+
+                    <label>Nom (optionnel)</label>
+
+                    <input type="text" id="bande-nom" placeholder="Ex : Poulailler nord">
+
+                </div>
+
+                <div class="champ">
+
+                    <label>Type de volaille</label>
+
+                    <input type="text" id="bande-type" placeholder="Ex : Poulet de chair, pondeuse...">
+
+                </div>
+
+                <div class="champ">
+
+                    <label>Fournisseur des poussins</label>
+
+                    <input type="text" id="bande-fournisseur" placeholder="Nom du fournisseur">
+
+                </div>
+
+                <div class="champ">
+
+                    <label>Emplacement</label>
+
+                    <input type="text" id="bande-emplacement" placeholder="Ex : Poulailler 2">
+
+                </div>
+
+                <div class="champ">
+
+                    <label>Date de départ</label>
+
+                    <input type="date" id="bande-date-depart" required>
+
+                </div>
+
+                <div class="champ">
+
+                    <label>Effectif initial</label>
+
+                    <input type="number" id="bande-effectif" min="1" step="1" placeholder="Ex : 500" required>
+
+                </div>
+
+                <div class="champ">
+
+                    <label>Poids initial moyen (optionnel)</label>
+
+                    <input type="number" id="bande-poids-initial" min="0" step="0.01" placeholder="Ex : 0.04 (kg)">
+
+                </div>
+
+                <div class="champ">
+
+                    <label>Observation</label>
+
+                    <textarea id="bande-observation" rows="3" placeholder="Notes éventuelles"></textarea>
+
+                </div>
+
+                <button type="submit" class="btn btn-principal">
+
+                    Enregistrer
+
+                </button>
+
+            </form>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- =====================================================
+         NOTIFICATION
+    ====================================================== -->
+
+    <div class="toast" id="toast">
+    </div>
+
+
+
+    <!-- =====================================================
+         SCRIPTS
+    ====================================================== -->
+
+    <!-- SQL.js -->
+    <script src="assets/sql-wasm.js"></script>
+
+    <!-- Base de données -->
+    <script src="js/db.js"></script>
+
+    <!-- Logique dépôt -->
+    <script src="js/depot.js"></script>
+
+    <!-- Logique ventes -->
+    <script src="js/ventes.js"></script>
+
+    <!-- Interface ventes -->
+    <script src="js/ventes-ui.js"></script>
+
+    <!-- Logique + interface dépenses du dépôt -->
+    <script src="js/depenses.js"></script>
+
+    <!-- Logique interface Clients -->
+    <script src="js/clients.js"></script>
+
+    <!-- Logique élevage -->
+    <script src="js/elevage.js"></script>
+
+    <!-- Interface élevage -->
+    <script src="js/elevage-ui.js"></script>
+
+    <!-- Logique vaccination -->
+    <script src="js/vaccination.js"></script>
+
+    <!-- Interface vaccination -->
+    <script src="js/vaccination-ui-v2.js"></script>
+
+    <!-- Logique poussins -->
+    <script src="js/poussins.js"></script>
+
+    <!-- Interface poussins -->
+    <script src="js/poussins-ui.js"></script>
+
+    <!-- Interface principale -->
+    <script src="js/app.js"></script>
+
+
+
+    <!-- =====================================================
+         LOGIQUE DU BOUTON +
+    ====================================================== -->
+
+    <script>
+
+        function actionAjoutContextuel() {
+
+            const vueActive =
+                document.querySelector('.vue.actif');
+
+            if (!vueActive) return;
+
+
+            switch (vueActive.id) {
+
+                case 'vue-produits':
+
+                    if (
+                        typeof ouvrirFormulaireProduit ===
+                        'function'
+                    ) {
+                        ouvrirFormulaireProduit();
+                    }
+
+                    break;
+
+
+                case 'vue-approvisionnements':
+
+                    if (
+                        typeof ouvrirFormulaireApprovisionnement ===
+                        'function'
+                    ) {
+                        ouvrirFormulaireApprovisionnement();
+                    }
+
+                    break;
+
+
+                case 'vue-categories':
+
+                    if (
+                        typeof ouvrirFormulaireCategorie ===
+                        'function'
+                    ) {
+                        ouvrirFormulaireCategorie();
+                    }
+
+                    break;
+
+
+                case 'vue-ventes':
+
+                    if (
+                        typeof ouvrirNouvelleVente ===
+                        'function'
+                    ) {
+                        ouvrirNouvelleVente();
+                    }
+
+                    break;
+
+
+                case 'vue-depenses':
+
+                    if (
+                        typeof ouvrirFormulaireDepense ===
+                        'function'
+                    ) {
+                        ouvrirFormulaireDepense();
+                    }
+
+                    break;
+
+
+                case 'vue-clients':
+
+                    if (
+                        typeof ouvrirFormulaireClient ===
+                        'function'
+                    ) {
+                        ouvrirFormulaireClient();
+                    }
+
+                    break;
+
+
+                case 'vue-elevage':
+
+                    if (
+                        typeof ElevageUI !==
+                        'undefined'
+                    ) {
+                        ElevageUI.ouvrirNouvelleBande();
+                    }
+
+                    break;
+
+
+                case 'vue-poussins':
+
+                    if (
+                        typeof PoussinsUI !==
+                        'undefined'
+                    ) {
+                        PoussinsUI.ouvrirChoixAjout();
+                    }
+
+                    break;
+
+
+                default:
+                    break;
+
+            }
+
+        }
+
+
+
+        /* =================================================
+           AFFICHAGE DU BOUTON +
+        ================================================= */
+
+        function mettreAJourBoutonAjout() {
+
+            const bouton =
+                document.getElementById(
+                    'btn-ajout-flottant'
+                );
+
+            const vueActive =
+                document.querySelector(
+                    '.vue.actif'
+                );
+
+            if (!bouton || !vueActive) return;
+
+
+            const vuesSansAjout = [
+                'vue-tableau'
+            ];
+
+
+            bouton.style.display =
+                vuesSansAjout.includes(
+                    vueActive.id
+                )
+                    ? 'none'
+                    : 'flex';
+
+        }
+
+
+
+        /* =================================================
+           SURVEILLANCE DES CHANGEMENTS DE VUE
+        ================================================= */
+
+        const observateurVue =
+            new MutationObserver(() => {
+
+                mettreAJourBoutonAjout();
+
+            });
+
+
+        document
+            .querySelectorAll('.vue')
+            .forEach(vue => {
+
+                observateurVue.observe(
+                    vue,
+                    {
+                        attributes: true,
+                        attributeFilter: ['class']
+                    }
+                );
+
+            });
+
+
+
+        document.addEventListener(
+            'DOMContentLoaded',
+            () => {
+
+                mettreAJourBoutonAjout();
+
+            }
+        );
+
+    </script>
+
+
+    <!-- =====================================================
+         ENREGISTREMENT DU SERVICE WORKER (mode hors ligne)
+    ====================================================== -->
+
+    <script>
+
+        if ('serviceWorker' in navigator) {
+
+            window.addEventListener('load', () => {
+
+                navigator.serviceWorker
+                    .register('./service-worker.js')
+                    .then((inscription) => {
+
+                        console.log(
+                            'Service Worker enregistré :',
+                            inscription.scope
+                        );
+                    })
+                    .catch((erreur) => {
+
+                        console.error(
+                            "Erreur d'enregistrement du Service Worker :",
+                            erreur
+                        );
+                    });
+            });
+        }
+
+    </script>
+
+</body>
+
+</html>

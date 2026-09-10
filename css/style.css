@@ -1,0 +1,508 @@
+/* =========================================================
+   VARIABLES — Palette inspirée du dépôt : grain, terre, volaille
+========================================================= */
+
+:root {
+    --vert-fonce: #2F4A3C;
+    --vert-mousse: #4A6B52;
+    --or-grain: #C99A3A;
+    --or-grain-clair: #E8C77A;
+    --creme: #FAF6EE;
+    --creme-carte: #FFFFFF;
+    --texte-principal: #2A2A24;
+    --texte-secondaire: #6B6759;
+    --bordure: #E4DDC9;
+    --rouge-alerte: #B54A3F;
+    --rouge-alerte-fond: #FBEAE7;
+    --vert-succes: #3F7A54;
+    --vert-succes-fond: #E9F3EC;
+    --ombre: 0 2px 10px rgba(42, 42, 36, 0.08);
+    --ombre-forte: 0 8px 24px rgba(42, 42, 36, 0.14);
+    --rayon: 14px;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background: var(--creme);
+    color: var(--texte-principal);
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* =========================================================
+   EN-TÊTE
+========================================================= */
+
+.app-header {
+    background: var(--vert-fonce);
+    color: white;
+    padding: 18px 20px 16px;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+}
+
+.app-header__titre {
+    font-size: 19px;
+    font-weight: 700;
+    margin: 0;
+    letter-spacing: 0.2px;
+}
+
+.app-header__soustitre {
+    font-size: 12.5px;
+    color: rgba(255, 255, 255, 0.68);
+    margin: 2px 0 0;
+}
+
+/* =========================================================
+   CONTENU PRINCIPAL
+========================================================= */
+
+.app-main {
+    padding: 16px 16px 90px;
+    max-width: 720px;
+    margin: 0 auto;
+}
+
+.vue {
+    display: none;
+    animation: apparition 0.18s ease;
+}
+
+.vue.actif {
+    display: block;
+}
+
+@keyframes apparition {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.vue__titre {
+    font-size: 20px;
+    font-weight: 700;
+    margin: 4px 0 16px;
+    color: var(--vert-fonce);
+}
+
+/* =========================================================
+   NAVIGATION BASSE (mobile-first)
+========================================================= */
+
+.nav-basse {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    background: white;
+    border-top: 1px solid var(--bordure);
+    box-shadow: 0 -4px 16px rgba(42, 42, 36, 0.06);
+    z-index: 100;
+}
+
+.nav-basse__item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    padding: 9px 4px 8px;
+    background: none;
+    border: none;
+    color: var(--texte-secondaire);
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.nav-basse__item svg {
+    width: 22px;
+    height: 22px;
+}
+
+.nav-basse__item.actif {
+    color: var(--vert-fonce);
+}
+
+.nav-basse__item.actif svg {
+    color: var(--or-grain);
+}
+
+/* =========================================================
+   CARTES
+========================================================= */
+
+.carte {
+    background: var(--creme-carte);
+    border-radius: var(--rayon);
+    box-shadow: var(--ombre);
+    padding: 16px;
+    margin-bottom: 14px;
+}
+
+.carte-stat {
+    background: var(--creme-carte);
+    border-radius: var(--rayon);
+    box-shadow: var(--ombre);
+    padding: 16px;
+    text-align: center;
+}
+
+.carte-stat__valeur {
+    font-size: 24px;
+    font-weight: 800;
+    color: var(--vert-fonce);
+    margin: 4px 0 2px;
+}
+
+.carte-stat__label {
+    font-size: 12px;
+    color: var(--texte-secondaire);
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+}
+
+.grille-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+/* =========================================================
+   LISTES (produits, catégories...)
+========================================================= */
+
+.liste-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 13px 0;
+    border-bottom: 1px solid var(--bordure);
+}
+
+.liste-item:last-child {
+    border-bottom: none;
+}
+
+.liste-item__info {
+    min-width: 0;
+}
+
+.liste-item__nom {
+    font-weight: 600;
+    font-size: 15px;
+    color: var(--texte-principal);
+}
+
+.liste-item__meta {
+    font-size: 12.5px;
+    color: var(--texte-secondaire);
+    margin-top: 2px;
+}
+
+.liste-item__actions {
+    display: flex;
+    gap: 6px;
+    flex-shrink: 0;
+}
+
+.badge {
+    display: inline-block;
+    padding: 3px 9px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.badge-alerte {
+    background: var(--rouge-alerte-fond);
+    color: var(--rouge-alerte);
+}
+
+.badge-ok {
+    background: var(--vert-succes-fond);
+    color: var(--vert-succes);
+}
+
+.badge-or {
+    background: #FBF1DC;
+    color: #8A6A1F;
+}
+
+/* =========================================================
+   BOUTONS
+========================================================= */
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 11px 18px;
+    border-radius: 10px;
+    border: none;
+    font-size: 14.5px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.08s ease, opacity 0.15s ease;
+}
+
+.btn:active {
+    transform: scale(0.97);
+}
+
+.btn-principal {
+    background: var(--vert-fonce);
+    color: white;
+    width: 100%;
+}
+
+.btn-or {
+    background: var(--or-grain);
+    color: #2A2A24;
+}
+
+.btn-icone {
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    border-radius: 8px;
+    background: var(--creme);
+    color: var(--texte-secondaire);
+}
+
+.btn-icone.danger {
+    background: var(--rouge-alerte-fond);
+    color: var(--rouge-alerte);
+}
+
+.btn-icone svg {
+    width: 16px;
+    height: 16px;
+}
+
+.btn-flottant {
+    position: fixed;
+    right: 18px;
+    bottom: 78px;
+    width: 54px;
+    height: 54px;
+    border-radius: 50%;
+    background: var(--or-grain);
+    color: #2A2A24;
+    border: none;
+    box-shadow: var(--ombre-forte);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 90;
+    cursor: pointer;
+}
+
+.btn-flottant svg {
+    width: 24px;
+    height: 24px;
+}
+
+/* =========================================================
+   FORMULAIRES / MODALES
+========================================================= */
+
+.champ {
+    margin-bottom: 14px;
+}
+
+.champ label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--texte-secondaire);
+    margin-bottom: 6px;
+}
+
+.champ input,
+.champ select,
+.champ textarea {
+    width: 100%;
+    padding: 11px 12px;
+    border: 1.5px solid var(--bordure);
+    border-radius: 10px;
+    font-size: 15px;
+    font-family: inherit;
+    background: var(--creme);
+    color: var(--texte-principal);
+}
+
+.champ input:focus,
+.champ select:focus,
+.champ textarea:focus {
+    outline: none;
+    border-color: var(--vert-mousse);
+    background: white;
+}
+
+.modale-fond {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(42, 42, 36, 0.45);
+    z-index: 200;
+    align-items: flex-end;
+    justify-content: center;
+}
+
+.modale-fond.actif {
+    display: flex;
+}
+
+.modale {
+    background: white;
+    width: 100%;
+    max-width: 480px;
+    border-radius: 20px 20px 0 0;
+    padding: 20px 20px calc(20px + env(safe-area-inset-bottom));
+    max-height: 88vh;
+    overflow-y: auto;
+    animation: montee 0.2s ease;
+}
+
+@keyframes montee {
+    from { transform: translateY(30px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+.modale__entete {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+}
+
+.modale__titre {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--vert-fonce);
+}
+
+.modale__fermer {
+    background: var(--creme);
+    border: none;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--texte-secondaire);
+    cursor: pointer;
+}
+
+/* =========================================================
+   ÉTAT VIDE
+========================================================= */
+
+.etat-vide {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--texte-secondaire);
+}
+
+.etat-vide svg {
+    width: 40px;
+    height: 40px;
+    color: var(--bordure);
+    margin-bottom: 10px;
+}
+
+.etat-vide p {
+    font-size: 14px;
+    margin: 0;
+}
+
+/* =========================================================
+   NOTIFICATION TOAST
+========================================================= */
+
+.toast {
+    position: fixed;
+    top: 16px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-20px);
+    background: var(--vert-fonce);
+    color: white;
+    padding: 12px 20px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    box-shadow: var(--ombre-forte);
+    z-index: 300;
+    opacity: 0;
+    transition: all 0.25s ease;
+    pointer-events: none;
+}
+
+.toast.visible {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+}
+
+.toast.erreur {
+    background: var(--rouge-alerte);
+}
+
+/* =========================================================
+   DIVERS
+========================================================= */
+
+.section-espace {
+    margin-top: 22px;
+}
+
+.ligne-titre-action {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+
+.ligne-titre-action h3 {
+    font-size: 15px;
+    font-weight: 700;
+    margin: 0;
+    color: var(--texte-principal);
+}
+
+.texte-secondaire {
+    color: var(--texte-secondaire);
+    font-size: 13px;
+}
+
+.select-produit-info {
+    background: var(--creme);
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-size: 13px;
+    color: var(--texte-secondaire);
+    margin-top: -6px;
+    margin-bottom: 14px;
+}
+
+/* Écrans larges : centrer un peu plus confortablement */
+@media (min-width: 600px) {
+    .grille-stats {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}

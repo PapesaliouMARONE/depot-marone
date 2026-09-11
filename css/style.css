@@ -25,7 +25,8 @@
     box-sizing: border-box;
 }
 
-html, body {
+html,
+body {
     margin: 0;
     padding: 0;
     height: 100%;
@@ -84,8 +85,15 @@ body {
 }
 
 @keyframes apparition {
-    from { opacity: 0; transform: translateY(6px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(6px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .vue__titre {
@@ -109,10 +117,23 @@ body {
     border-top: 1px solid var(--bordure);
     box-shadow: 0 -4px 16px rgba(42, 42, 36, 0.06);
     z-index: 100;
+
+    /* Défilement horizontal si les icônes ne tiennent pas toutes */
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+}
+
+.nav-basse::-webkit-scrollbar {
+    display: none;
 }
 
 .nav-basse__item {
-    flex: 1;
+    /* Taille fixe : chaque icône garde une largeur lisible,
+       peu importe le nombre d'items ou la largeur de l'écran */
+    flex: 0 0 auto;
+    width: 72px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -124,6 +145,19 @@ body {
     font-size: 11px;
     font-weight: 600;
     cursor: pointer;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 72px;
+}
+
+/* Sur les écrans larges (tablette, PC, mode paysage),
+   les icônes se répartissent pour remplir toute la largeur */
+@media (min-width: 650px) {
+    .nav-basse__item {
+        flex: 1 1 auto;
+        width: auto;
+    }
 }
 
 .nav-basse__item svg {
@@ -380,8 +414,15 @@ body {
 }
 
 @keyframes montee {
-    from { transform: translateY(30px); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
+    from {
+        transform: translateY(30px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
 }
 
 .modale__entete {

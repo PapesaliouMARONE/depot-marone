@@ -19,6 +19,36 @@ let panierVente = [];
    UTILITAIRES
    ========================================================= */
 
+/**
+ * Lit la quantité saisie dans le champ #quantite-vente.
+ *
+ * Certains claviers/paramètres régionaux (français) tapent
+ * une virgule comme séparateur décimal (ex: "1,5"), ce que
+ * les navigateurs refusent parfois silencieusement dans un
+ * champ type="number" — la valeur redevient alors vide en
+ * interne, même si le champ paraît rempli à l'écran.
+ *
+ * Cette fonction accepte donc virgule ET point.
+ */
+function lireQuantiteVente() {
+
+    const champ =
+        document.getElementById(
+            'quantite-vente'
+        );
+
+    if (!champ) {
+        return NaN;
+    }
+
+    const texteBrut =
+        String(champ.value || '')
+            .trim()
+            .replace(',', '.');
+
+    return Number(texteBrut);
+}
+
 function montantVenteUI(nombre) {
 
     return new Intl.NumberFormat('fr-FR')
@@ -209,10 +239,10 @@ function ouvrirNouvelleVente() {
                 <label>Quantité</label>
 
                 <input
-                    type="number"
+                    type="text"
+                    inputmode="decimal"
                     id="quantite-vente"
-                    min="0.01"
-                    step="0.01"
+                    placeholder="1"
                     value="1"
                     oninput="mettreAJourApercuPrixVente()">
 
@@ -406,11 +436,7 @@ function mettreAJourApercuPrixVente() {
         );
 
     const quantite =
-        Number(
-            document.getElementById(
-                'quantite-vente'
-            ).value
-        );
+        lireQuantiteVente();
 
     if (
         !Number.isInteger(produitId)
@@ -476,11 +502,7 @@ function ajouterLignePanier() {
         );
 
     const quantite =
-        Number(
-            document.getElementById(
-                'quantite-vente'
-            ).value
-        );
+        lireQuantiteVente();
 
     if (!Number.isInteger(produitId)) {
 
@@ -725,7 +747,7 @@ async function validerNouvelleVente(event) {
             unite_vente_id:
                 ligne.unite_vente_id,
 
-            quantite_vendue:
+            quantite:
                 ligne.quantite_vendue
         }));
 

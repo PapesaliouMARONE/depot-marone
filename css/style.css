@@ -130,10 +130,13 @@ body {
 }
 
 .nav-basse__item {
-    /* Taille fixe : chaque icône garde une largeur lisible,
-       peu importe le nombre d'items ou la largeur de l'écran */
-    flex: 0 0 auto;
-    width: 72px;
+    /* flex-grow permet aux icônes de s'étirer pour remplir
+       tout l'espace disponible sur grand écran, tout en
+       gardant une largeur minimale lisible (72px) sur
+       petit écran. Plus besoin de seuil fixe : ça s'adapte
+       automatiquement à n'importe quelle largeur d'écran. */
+    flex: 1 1 72px;
+    min-width: 72px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -148,16 +151,7 @@ body {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    max-width: 72px;
-}
-
-/* Sur les écrans larges (tablette, PC, mode paysage),
-   les icônes se répartissent pour remplir toute la largeur */
-@media (min-width: 650px) {
-    .nav-basse__item {
-        flex: 1 1 auto;
-        width: auto;
-    }
+    max-width: 140px;
 }
 
 .nav-basse__item svg {

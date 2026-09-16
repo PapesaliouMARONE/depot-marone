@@ -521,12 +521,18 @@ const PoussinsUI = {
 
         const f = event.target;
 
+        const quantiteLivree =
+            f.quantite_recue.value;
+
+        const dateLivraison =
+            f.date_livraison.value;
+
         try {
 
             await Poussins.ajouterLivraison({
                 commande_id: commandeId,
-                date_livraison: f.date_livraison.value,
-                quantite_recue: f.quantite_recue.value,
+                date_livraison: dateLivraison,
+                quantite_recue: quantiteLivree,
                 fournisseur: f.fournisseur.value,
                 etat_livraison: f.etat_livraison.value,
                 observation: f.observation.value
@@ -534,14 +540,75 @@ const PoussinsUI = {
 
             afficherToast('Livraison enregistrée.');
 
-            this.voirCommande(commandeId);
-
             this.rendreListeCommandes();
+
+            this.proposerVenteApresLivraison(
+                quantiteLivree,
+                dateLivraison,
+                commandeId
+            );
 
         } catch (erreur) {
 
             afficherToast(erreur.message, true);
         }
+    },
+
+
+    /**
+     * En aviculture, les poussins livrés sont très souvent
+     * revendus le jour même. Ce petit écran intermédiaire
+     * propose d'enchaîner directement sur la vente,
+     * pré-remplie avec la quantité et la date de la
+     * livraison qui vient d'être enregistrée.
+     */
+
+    proposerVenteApresLivraison(
+        quantite,
+        date,
+        commandeId
+    ) {
+
+        ouvrirModale(`
+
+            <div class="modale__entete">
+
+                <span class="modale__titre">
+                    Livraison enregistrée ✓
+                </span>
+
+                <button class="modale__fermer"
+                    onclick="PoussinsUI.voirCommande(${commandeId})">
+                    ✕
+                </button>
+
+            </div>
+
+            <p class="texte-secondaire">
+                Ces poussins sont-ils revendus maintenant ?
+            </p>
+
+            <div style="display:flex; gap:10px; margin-top:16px;">
+
+                <button
+                    class="btn btn-principal"
+                    style="flex:1;"
+                    onclick="PoussinsUI.ouvrirFormulaireVente({
+                        quantite: ${Number(quantite)},
+                        date: '${date}'
+                    })">
+                    Vendre maintenant
+                </button>
+
+                <button
+                    class="btn"
+                    style="flex:1;"
+                    onclick="PoussinsUI.voirCommande(${commandeId})">
+                    Plus tard
+                </button>
+
+            </div>
+        `);
     },
 
 
@@ -802,10 +869,16 @@ const PoussinsUI = {
        VENTES — FORMULAIRE
        ===================================================== */
 
-    ouvrirFormulaireVente() {
+    ouvrirFormulaireVente(prefill = {}) {
 
         const stock =
             Poussins.stockDisponible();
+
+        const quantitePrefill =
+            prefill.quantite || '';
+
+        const datePrefill =
+            prefill.date || dateAujourdhui();
 
         ouvrirModale(`
 
@@ -843,13 +916,15 @@ const PoussinsUI = {
                 <div class="champ">
                     <label>Date de vente</label>
                     <input type="date" name="date_vente"
-                        value="${dateAujourdhui()}" required>
+                        value="${datePrefill}" required>
                 </div>
 
                 <div class="champ">
                     <label>Quantité vendue</label>
                     <input type="number" name="quantite"
-                        min="1" max="${stock}" step="1" placeholder="Ex : 100" required>
+                        min="1" max="${stock}" step="1"
+                        value="${quantitePrefill}"
+                        placeholder="Ex : 100" required>
                 </div>
 
                 <div class="champ">

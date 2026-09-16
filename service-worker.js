@@ -19,7 +19,7 @@
  * =========================================================
  */
 
-const CACHE_VERSION = 'depot-marone-v7';
+const CACHE_VERSION = 'depot-marone-v8';
 
 const FICHIERS_A_METTRE_EN_CACHE = [
     './',

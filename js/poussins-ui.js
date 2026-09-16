@@ -106,6 +106,89 @@ const PoussinsUI = {
 
 
     /* =====================================================
+       DÉTAIL PAR COMMANDE (FIFO)
+       ===================================================== */
+
+    ouvrirDetailParCommande() {
+
+        const lots =
+            Poussins.calculEconomiqueParCommande();
+
+        if (lots.length === 0) {
+
+            ouvrirModale(`
+
+                <div class="modale__entete">
+                    <span class="modale__titre">
+                        Détail par commande
+                    </span>
+                    <button class="modale__fermer" onclick="fermerModale()">
+                        ✕
+                    </button>
+                </div>
+
+                <div class="etat-vide">
+                    <p>Aucune commande livrée pour l'instant.</p>
+                </div>
+            `);
+
+            return;
+        }
+
+        ouvrirModale(`
+
+            <div class="modale__entete">
+
+                <span class="modale__titre">
+                    Détail par commande
+                </span>
+
+                <button class="modale__fermer" onclick="fermerModale()">
+                    ✕
+                </button>
+
+            </div>
+
+            <p class="texte-secondaire" style="margin-bottom:14px;">
+                Estimation par ordre chronologique (méthode FIFO) :
+                on suppose que chaque vente consomme d'abord le lot
+                le plus ancien encore disponible.
+            </p>
+
+            ${lots.map(lot => `
+                    <div class="liste-item" style="cursor:default; flex-direction:column; align-items:stretch; gap:6px;">
+
+                        <div style="display:flex; justify-content:space-between;">
+                            <span class="liste-item__nom">
+                                ${this.echapper(lot.fournisseur || 'Commande')}
+                                — ${formaterDate(lot.dateCommande)}
+                            </span>
+                            <strong style="color:${lot.benefice >= 0 ? '#176b3a' : '#B54A3F'
+            };">
+                                ${formaterMontant(lot.benefice)}
+                            </strong>
+                        </div>
+
+                        <div class="liste-item__meta">
+                            Livré : ${lot.quantiteLivree}
+                            — Vendu : ${lot.quantiteVendue}
+                            — En stock : ${lot.quantiteEnStock}
+                        </div>
+
+                        <div class="liste-item__meta">
+                            Achat : ${formaterMontant(lot.montantAchat)}
+                            (${formaterMontant(lot.prixAchatUnitaire)} / poussin)
+                            — Revenu alloué : ${formaterMontant(lot.revenuAlloue)}
+                        </div>
+
+                    </div>
+                `).join('')
+            }
+        `);
+    },
+
+
+    /* =====================================================
        COMMANDES — LISTE
        ===================================================== */
 
@@ -159,11 +242,10 @@ const PoussinsUI = {
 
                         <div class="liste-item__nom">
                             ${this.echapper(c.fournisseur)}
-                            ${
-                                c.race
-                                    ? ' — ' + this.echapper(c.race)
-                                    : ''
-                            }
+                            ${c.race
+                    ? ' — ' + this.echapper(c.race)
+                    : ''
+                }
                         </div>
 
                         <div class="liste-item__meta">
@@ -347,13 +429,12 @@ const PoussinsUI = {
                 <strong>${formaterDate(commande.date_commande)}</strong>
                 <br>
 
-                ${
-                    commande.date_livraison_prevue
-                        ? `Livraison prévue :
+                ${commande.date_livraison_prevue
+                ? `Livraison prévue :
                            <strong>${formaterDate(commande.date_livraison_prevue)}</strong>
                            <br>`
-                        : ''
-                }
+                : ''
+            }
 
                 Quantité commandée :
                 <strong>${commande.quantite_commandee} poussins</strong>
@@ -368,11 +449,10 @@ const PoussinsUI = {
                 <strong>${formaterMontant(commande.montant_total)}</strong>
                 <br>
 
-                ${
-                    commande.race
-                        ? `Race : <strong>${this.echapper(commande.race)}</strong><br>`
-                        : ''
-                }
+                ${commande.race
+                ? `Race : <strong>${this.echapper(commande.race)}</strong><br>`
+                : ''
+            }
 
                 Statut :
                 <span class="badge ${badges[commande.statut] || 'badge-or'}">
@@ -381,9 +461,8 @@ const PoussinsUI = {
 
             </div>
 
-            ${
-                commande.statut !== 'ANNULEE'
-                    ? `
+            ${commande.statut !== 'ANNULEE'
+                ? `
                         <div style="display:grid; gap:8px; margin:16px 0;">
                             <button class="btn" type="button"
                                 onclick="PoussinsUI.ouvrirFormulaireLivraison(${id})">
@@ -396,15 +475,14 @@ const PoussinsUI = {
                             </button>
                         </div>
                     `
-                    : ''
+                : ''
             }
 
             <h3>Livraisons</h3>
 
-            ${
-                livraisons.length === 0
-                    ? '<p class="texte-secondaire">Aucune livraison enregistrée.</p>'
-                    : livraisons.map(l => `
+            ${livraisons.length === 0
+                ? '<p class="texte-secondaire">Aucune livraison enregistrée.</p>'
+                : livraisons.map(l => `
                         <div class="liste-item">
                             <div class="liste-item__info">
                                 <div class="liste-item__nom">
@@ -413,11 +491,10 @@ const PoussinsUI = {
                                 </div>
                                 <div class="liste-item__meta">
                                     ${this.echapper(l.etat_livraison)}
-                                    ${
-                                        l.observation
-                                            ? ' — ' + this.echapper(l.observation)
-                                            : ''
-                                    }
+                                    ${l.observation
+                        ? ' — ' + this.echapper(l.observation)
+                        : ''
+                    }
                                 </div>
                             </div>
                         </div>
@@ -456,16 +533,14 @@ const PoussinsUI = {
                 — ${commande.quantite_commandee} poussins commandés
             </p>
 
-            <div class="${
-                reste > 0
-                    ? 'alerte alerte--info'
-                    : 'alerte alerte--danger'
+            <div class="${reste > 0
+                ? 'alerte alerte--info'
+                : 'alerte alerte--danger'
             }" style="margin-bottom:12px;">
-                ${
-                    reste > 0
-                        ? `Reste à livrer sur cette commande : <strong>${reste} poussin(s)</strong>`
-                        : `Cette commande a déjà été entièrement livrée.`
-                }
+                ${reste > 0
+                ? `Reste à livrer sur cette commande : <strong>${reste} poussin(s)</strong>`
+                : `Cette commande a déjà été entièrement livrée.`
+            }
             </div>
 
             <form onsubmit="PoussinsUI.soumettreLivraison(event, ${commandeId})">
@@ -504,9 +579,8 @@ const PoussinsUI = {
                     <input type="text" name="observation">
                 </div>
 
-                <button type="submit" class="btn btn-principal" ${
-                    reste <= 0 ? 'disabled' : ''
-                }>
+                <button type="submit" class="btn btn-principal" ${reste <= 0 ? 'disabled' : ''
+            }>
                     Enregistrer la livraison
                 </button>
 
@@ -840,24 +914,22 @@ const PoussinsUI = {
                             —
                             ${v.quantite} poussins
                             —
-                            ${
-                                v.mode_paiement === 'credit'
-                                    ? 'Crédit'
-                                    : 'Comptant'
-                            }
+                            ${v.mode_paiement === 'credit'
+                    ? 'Crédit'
+                    : 'Comptant'
+                }
                         </div>
 
                     </div>
 
                     <div style="text-align:right;">
                         <strong>${formaterMontant(v.montant_total)}</strong>
-                        ${
-                            Number(v.solde_du) > 0
-                                ? `<div class="liste-item__meta" style="color:#B54A3F;">
+                        ${Number(v.solde_du) > 0
+                    ? `<div class="liste-item__meta" style="color:#B54A3F;">
                                     Solde : ${formaterMontant(v.solde_du)}
                                    </div>`
-                                : ''
-                        }
+                    : ''
+                }
                     </div>
 
                 </div>
@@ -894,16 +966,14 @@ const PoussinsUI = {
 
             </div>
 
-            <div class="${
-                stock > 0
-                    ? 'alerte alerte--info'
-                    : 'alerte alerte--danger'
+            <div class="${stock > 0
+                ? 'alerte alerte--info'
+                : 'alerte alerte--danger'
             }" style="margin-bottom:12px;">
-                ${
-                    stock > 0
-                        ? `Stock disponible : <strong>${stock} poussin(s)</strong>`
-                        : `Aucun poussin en stock actuellement. Enregistrez d'abord une livraison.`
-                }
+                ${stock > 0
+                ? `Stock disponible : <strong>${stock} poussin(s)</strong>`
+                : `Aucun poussin en stock actuellement. Enregistrez d'abord une livraison.`
+            }
             </div>
 
             <form onsubmit="PoussinsUI.soumettreVente(event)">
@@ -953,9 +1023,8 @@ const PoussinsUI = {
                     <input type="text" name="observation">
                 </div>
 
-                <button type="submit" class="btn btn-principal" ${
-                    stock <= 0 ? 'disabled' : ''
-                }>
+                <button type="submit" class="btn btn-principal" ${stock <= 0 ? 'disabled' : ''
+            }>
                     Enregistrer la vente
                 </button>
 
@@ -1055,26 +1124,24 @@ const PoussinsUI = {
                 <strong>${vente.mode_paiement === 'credit' ? 'Crédit' : 'Comptant'}</strong><br>
                 Payé : <strong>${formaterMontant(vente.montant_paye)}</strong><br>
 
-                ${
-                    Number(vente.solde_du) > 0
-                        ? `Solde dû :
+                ${Number(vente.solde_du) > 0
+                ? `Solde dû :
                            <strong style="color:#B54A3F;">
                                ${formaterMontant(vente.solde_du)}
                            </strong>`
-                        : ''
-                }
+                : ''
+            }
 
             </div>
 
-            ${
-                Number(vente.solde_du) > 0
-                    ? `
+            ${Number(vente.solde_du) > 0
+                ? `
                         <button class="btn btn-principal" type="button"
                             onclick="PoussinsUI.ouvrirFormulairePaiement(${id})">
                             Enregistrer un paiement
                         </button>
                     `
-                    : ''
+                : ''
             }
 
         `);

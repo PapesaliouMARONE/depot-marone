@@ -167,8 +167,8 @@ const Poussins = {
 
         const poussinsParCarton =
             poussins_par_carton === null
-            || poussins_par_carton === undefined
-            || String(poussins_par_carton).trim() === ''
+                || poussins_par_carton === undefined
+                || String(poussins_par_carton).trim() === ''
                 ? 50
                 : Number(poussins_par_carton);
 
@@ -557,8 +557,8 @@ const Poussins = {
                             date_livraison,
                             quantiteRecue,
                             fournisseur
-                                || commande.fournisseur
-                                || null,
+                            || commande.fournisseur
+                            || null,
                             etat_livraison,
                             observation || null
                         ]
@@ -566,7 +566,7 @@ const Poussins = {
 
                 const nouveauStatut =
                     nouveauTotalLivre >=
-                    quantiteCommandee
+                        quantiteCommandee
                         ? 'LIVREE'
                         : 'PARTIELLE';
 
@@ -713,7 +713,7 @@ const Poussins = {
             String(
                 mode_paiement || 'comptant'
             ).trim()
-            .toLowerCase();
+                .toLowerCase();
 
         if (
             !['comptant', 'credit'].includes(
@@ -751,8 +751,8 @@ const Poussins = {
 
             montantPayeNombre =
                 montant_paye === null
-                || montant_paye === undefined
-                || String(montant_paye).trim() === ''
+                    || montant_paye === undefined
+                    || String(montant_paye).trim() === ''
                     ? 0
                     : Number(montant_paye);
 
@@ -1220,6 +1220,220 @@ const Poussins = {
             creancesEnCours:
                 this.totalCreances()
         };
+    },
+
+
+    /**
+     * =====================================================
+     * DÉTAIL DU BÉNÉFICE PAR COMMANDE (méthode FIFO)
+     * =====================================================
+     *
+     * Les poussins de différentes commandes sont mélangés
+     * physiquement (pas de lien direct vente ↔ commande en
+     * base de données). Pour quand même donner un détail
+     * par commande, on applique la méthode comptable FIFO
+     * ("premier entré, premier sorti") :
+     *
+     * On suppose que chaque vente consomme en priorité les
+     * poussins de la commande livrée la plus ANCIENNE qui a
+     * encore du stock disponible, dans l'ordre chronologique
+     * des ventes.
+     *
+     * Pour chaque commande, on obtient ainsi :
+     * - quantiteLivree      : total reçu pour cette commande
+     * - quantiteVendue      : combien de CE lot a été vendu
+     * - quantiteEnStock     : combien de CE lot reste à vendre
+     * - montantAchat        : coût total du lot
+     * - revenuAlloue        : revenu généré par CE lot
+     * - benefice            : revenuAlloue − coût du lot vendu
+     *
+     * C'est une estimation basée sur l'ordre chronologique,
+     * pas un suivi physique réel lot par lot.
+     * =====================================================
+     */
+
+    calculEconomiqueParCommande() {
+
+        // 1. Les "lots" = livraisons regroupées par commande,
+        //    triés du plus ancien au plus récent (FIFO).
+
+        const lots =
+            DB.requeteLecture(
+                `
+                SELECT
+                    c.id AS commande_id,
+                    c.fournisseur,
+                    c.date_commande,
+                    c.prix_achat_unitaire,
+                    c.statut,
+                    COALESCE(
+                        SUM(l.quantite_recue),
+                        0
+                    ) AS quantite_livree,
+                    MIN(l.date_livraison) AS premiere_livraison
+                FROM commandes_poussins c
+                LEFT JOIN livraisons_poussins l
+                    ON l.commande_id = c.id
+                GROUP BY c.id
+                HAVING quantite_livree > 0
+                ORDER BY
+                    premiere_livraison ASC,
+                    c.id ASC
+                `
+            ).map(lot => ({
+
+                commandeId:
+                    lot.commande_id,
+
+                fournisseur:
+                    lot.fournisseur,
+
+                dateCommande:
+                    lot.date_commande,
+
+                prixAchatUnitaire:
+                    Number(lot.prix_achat_unitaire) || 0,
+
+                statut:
+                    lot.statut,
+
+                quantiteLivree:
+                    Number(lot.quantite_livree) || 0,
+
+                // Quantité de ce lot pas encore allouée
+                // à une vente (file FIFO, décrémentée
+                // au fil de l'allocation ci-dessous).
+                resteDansLot:
+                    Number(lot.quantite_livree) || 0,
+
+                quantiteVendue: 0,
+
+                revenuAlloue: 0
+            }));
+
+        // 2. Les ventes, triées chronologiquement
+        //    (plus ancienne d'abord).
+
+        const ventes =
+            DB.requeteLecture(
+                `
+                SELECT
+                    quantite,
+                    prix_unitaire,
+                    date_vente
+                FROM ventes_poussins
+                ORDER BY
+                    date_vente ASC,
+                    id ASC
+                `
+            );
+
+        // 3. Allocation FIFO : chaque vente consomme les
+        //    lots disponibles en commençant par le plus
+        //    ancien.
+
+        let indexLot = 0;
+
+        for (const vente of ventes) {
+
+            let quantiteRestanteAAllouer =
+                Number(vente.quantite) || 0;
+
+            const prixVenteUnitaire =
+                Number(vente.prix_unitaire) || 0;
+
+            while (
+                quantiteRestanteAAllouer > 0
+                &&
+                indexLot < lots.length
+            ) {
+
+                const lot =
+                    lots[indexLot];
+
+                if (lot.resteDansLot <= 0) {
+
+                    indexLot++;
+                    continue;
+                }
+
+                const quantitePriseDansCeLot =
+                    Math.min(
+                        lot.resteDansLot,
+                        quantiteRestanteAAllouer
+                    );
+
+                lot.resteDansLot -=
+                    quantitePriseDansCeLot;
+
+                lot.quantiteVendue +=
+                    quantitePriseDansCeLot;
+
+                lot.revenuAlloue +=
+                    quantitePriseDansCeLot *
+                    prixVenteUnitaire;
+
+                quantiteRestanteAAllouer -=
+                    quantitePriseDansCeLot;
+            }
+
+            // Si quantiteRestanteAAllouer > 0 ici, ça veut
+            // dire qu'une vente historique dépasse le stock
+            // livré connu (données antérieures à la mise en
+            // place du contrôle de stock) — on l'ignore pour
+            // ce détail par commande, elle reste comptée
+            // dans le chiffre d'affaires global.
+        }
+
+        // 4. Mise en forme finale.
+
+        return lots.map(lot => {
+
+            const coutDuLotVendu =
+                lot.quantiteVendue *
+                lot.prixAchatUnitaire;
+
+            const coutTotalDuLot =
+                lot.quantiteLivree *
+                lot.prixAchatUnitaire;
+
+            return {
+
+                commandeId:
+                    lot.commandeId,
+
+                fournisseur:
+                    lot.fournisseur,
+
+                dateCommande:
+                    lot.dateCommande,
+
+                statut:
+                    lot.statut,
+
+                prixAchatUnitaire:
+                    lot.prixAchatUnitaire,
+
+                quantiteLivree:
+                    lot.quantiteLivree,
+
+                quantiteVendue:
+                    lot.quantiteVendue,
+
+                quantiteEnStock:
+                    lot.resteDansLot,
+
+                montantAchat:
+                    coutTotalDuLot,
+
+                revenuAlloue:
+                    lot.revenuAlloue,
+
+                benefice:
+                    lot.revenuAlloue -
+                    coutDuLotVendu
+            };
+        });
     }
 };
 

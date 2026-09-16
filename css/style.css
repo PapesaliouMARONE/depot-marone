@@ -541,3 +541,25 @@ body {
         grid-template-columns: repeat(3, 1fr);
     }
 }
+
+/* =========================================================
+   ALERTES (info / danger) — utilisées notamment pour
+   afficher le stock disponible avant une vente
+   ========================================================= */
+
+.alerte {
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.alerte--info {
+    background: #E4F1E8;
+    color: var(--vert, #176b3a);
+}
+
+.alerte--danger {
+    background: #FBE7E4;
+    color: #B54A3F;
+}

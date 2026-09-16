@@ -291,6 +291,45 @@ const Poussins = {
     },
 
 
+    /**
+     * Quantité restant à livrer pour une commande précise
+     * (quantité commandée moins ce qui a déjà été livré).
+     */
+
+    resteALivrer(commandeId) {
+
+        const commande =
+            this.obtenirCommande(commandeId);
+
+        if (!commande) {
+
+            return 0;
+        }
+
+        const dejaLivre =
+            Number(
+                DB.requeteLecture(
+                    `
+                    SELECT
+                        COALESCE(
+                            SUM(quantite_recue),
+                            0
+                        ) AS total
+                    FROM livraisons_poussins
+                    WHERE commande_id = ?
+                    `,
+                    [commandeId]
+                )[0]?.total
+            ) || 0;
+
+        const reste =
+            Number(commande.quantite_commandee) -
+            dejaLivre;
+
+        return reste > 0 ? reste : 0;
+    },
+
+
     /* =====================================================
        LIVRAISONS
        ===================================================== */
@@ -374,6 +413,19 @@ const Poussins = {
 
     }) {
 
+        if (
+            commande_id === null
+            ||
+            commande_id === undefined
+            ||
+            commande_id === ''
+        ) {
+
+            throw new Error(
+                "Une livraison doit obligatoirement être rattachée à une commande."
+            );
+        }
+
         if (!date_livraison) {
 
             throw new Error(
@@ -433,6 +485,58 @@ const Poussins = {
                     );
                 }
 
+                if (commande.statut === 'ANNULEE') {
+
+                    throw new Error(
+                        "Impossible de livrer une commande annulée."
+                    );
+                }
+
+                /*
+                 * On calcule ce qui a DÉJÀ été livré pour
+                 * cette commande (livraisons précédentes),
+                 * pour vérifier le cumul — pas seulement
+                 * cette livraison isolée.
+                 */
+
+                const dejaLivre =
+                    Number(
+                        tx.lire(
+                            `
+                            SELECT
+                                COALESCE(
+                                    SUM(quantite_recue),
+                                    0
+                                ) AS total
+                            FROM livraisons_poussins
+                            WHERE commande_id = ?
+                            `,
+                            [commande_id]
+                        )[0]?.total
+                    ) || 0;
+
+                const quantiteCommandee =
+                    Number(
+                        commande.quantite_commandee
+                    );
+
+                const nouveauTotalLivre =
+                    dejaLivre +
+                    quantiteRecue;
+
+                if (nouveauTotalLivre > quantiteCommandee) {
+
+                    const reste =
+                        quantiteCommandee -
+                        dejaLivre;
+
+                    throw new Error(
+                        reste > 0
+                            ? `Cette livraison dépasse la commande. Il reste ${reste} poussin(s) à livrer sur cette commande.`
+                            : "Cette commande a déjà été entièrement livrée."
+                    );
+                }
+
                 const livraisonId =
                     tx.ecrire(
                         `
@@ -461,8 +565,8 @@ const Poussins = {
                     );
 
                 const nouveauStatut =
-                    quantiteRecue >=
-                    Number(commande.quantite_commandee)
+                    nouveauTotalLivre >=
+                    quantiteCommandee
                         ? 'LIVREE'
                         : 'PARTIELLE';
 
@@ -484,7 +588,10 @@ const Poussins = {
                         livraisonId,
 
                     statutCommande:
-                        nouveauStatut
+                        nouveauStatut,
+
+                    totalLivre:
+                        nouveauTotalLivre
                 };
             }
         );
@@ -672,34 +779,89 @@ const Poussins = {
             montantTotal -
             montantPayeNombre;
 
-        return DB.requeteEcriture(
-            `
-            INSERT INTO ventes_poussins
-            (
-                client,
-                date_vente,
-                quantite,
-                prix_unitaire,
-                montant_total,
-                mode_paiement,
-                montant_paye,
-                solde_du,
-                observation
-            )
-            VALUES
-            (?, ?, ?, ?, ?, ?, ?, ?, ?)
-            `,
-            [
-                client || null,
-                date_vente,
-                quantiteVendue,
-                prixUnitaireNombre,
-                montantTotal,
-                mode_paiement,
-                montantPayeNombre,
-                soldeDu,
-                observation || null
-            ]
+        return DB.transaction(
+            async (tx) => {
+
+                /*
+                 * Stock réellement disponible = tout ce qui
+                 * a été livré (toutes commandes confondues)
+                 * moins tout ce qui a déjà été vendu.
+                 *
+                 * On ne peut pas vendre plus que ce qui a
+                 * physiquement été reçu.
+                 */
+
+                const totalLivre =
+                    Number(
+                        tx.lire(
+                            `
+                            SELECT
+                                COALESCE(
+                                    SUM(quantite_recue),
+                                    0
+                                ) AS total
+                            FROM livraisons_poussins
+                            `
+                        )[0]?.total
+                    ) || 0;
+
+                const totalVendu =
+                    Number(
+                        tx.lire(
+                            `
+                            SELECT
+                                COALESCE(
+                                    SUM(quantite),
+                                    0
+                                ) AS total
+                            FROM ventes_poussins
+                            `
+                        )[0]?.total
+                    ) || 0;
+
+                const stockDisponible =
+                    totalLivre -
+                    totalVendu;
+
+                if (quantiteVendue > stockDisponible) {
+
+                    throw new Error(
+                        stockDisponible > 0
+                            ? `Stock de poussins insuffisant. Il reste seulement ${stockDisponible} poussin(s) disponible(s).`
+                            : "Aucun poussin en stock. Enregistrez d'abord une livraison avant de vendre."
+                    );
+                }
+
+                return tx.ecrire(
+                    `
+                    INSERT INTO ventes_poussins
+                    (
+                        client,
+                        date_vente,
+                        quantite,
+                        prix_unitaire,
+                        montant_total,
+                        mode_paiement,
+                        montant_paye,
+                        solde_du,
+                        observation
+                    )
+                    VALUES
+                    (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    `,
+                    [
+                        client || null,
+                        date_vente,
+                        quantiteVendue,
+                        prixUnitaireNombre,
+                        montantTotal,
+                        mode_paiement,
+                        montantPayeNombre,
+                        soldeDu,
+                        observation || null
+                    ]
+                );
+            }
         );
     },
 
@@ -792,6 +954,46 @@ const Poussins = {
                     nouveauSolde
                 };
             }
+        );
+    },
+
+
+    /**
+     * Stock de poussins réellement disponible à la vente :
+     * total livré (toutes commandes confondues) moins
+     * total déjà vendu.
+     */
+
+    stockDisponible() {
+
+        const totalLivre =
+            DB.requeteLecture(
+                `
+                SELECT
+                    COALESCE(
+                        SUM(quantite_recue),
+                        0
+                    ) AS total
+                FROM livraisons_poussins
+                `
+            )[0]?.total;
+
+        const totalVendu =
+            DB.requeteLecture(
+                `
+                SELECT
+                    COALESCE(
+                        SUM(quantite),
+                        0
+                    ) AS total
+                FROM ventes_poussins
+                `
+            )[0]?.total;
+
+        return (
+            (Number(totalLivre) || 0)
+            -
+            (Number(totalVendu) || 0)
         );
     },
 

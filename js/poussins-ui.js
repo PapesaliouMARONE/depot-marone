@@ -433,6 +433,9 @@ const PoussinsUI = {
         const commande =
             Poussins.obtenirCommande(commandeId);
 
+        const reste =
+            Poussins.resteALivrer(commandeId);
+
         ouvrirModale(`
 
             <div class="modale__entete">
@@ -453,6 +456,18 @@ const PoussinsUI = {
                 — ${commande.quantite_commandee} poussins commandés
             </p>
 
+            <div class="${
+                reste > 0
+                    ? 'alerte alerte--info'
+                    : 'alerte alerte--danger'
+            }" style="margin-bottom:12px;">
+                ${
+                    reste > 0
+                        ? `Reste à livrer sur cette commande : <strong>${reste} poussin(s)</strong>`
+                        : `Cette commande a déjà été entièrement livrée.`
+                }
+            </div>
+
             <form onsubmit="PoussinsUI.soumettreLivraison(event, ${commandeId})">
 
                 <div class="champ">
@@ -464,8 +479,8 @@ const PoussinsUI = {
                 <div class="champ">
                     <label>Quantité réellement reçue</label>
                     <input type="number" name="quantite_recue"
-                        min="1" step="1"
-                        value="${commande.quantite_commandee}" required>
+                        min="1" max="${reste}" step="1"
+                        value="${reste}" required>
                 </div>
 
                 <div class="champ">
@@ -489,7 +504,9 @@ const PoussinsUI = {
                     <input type="text" name="observation">
                 </div>
 
-                <button type="submit" class="btn btn-principal">
+                <button type="submit" class="btn btn-principal" ${
+                    reste <= 0 ? 'disabled' : ''
+                }>
                     Enregistrer la livraison
                 </button>
 
@@ -787,6 +804,9 @@ const PoussinsUI = {
 
     ouvrirFormulaireVente() {
 
+        const stock =
+            Poussins.stockDisponible();
+
         ouvrirModale(`
 
             <div class="modale__entete">
@@ -799,6 +819,18 @@ const PoussinsUI = {
                     ✕
                 </button>
 
+            </div>
+
+            <div class="${
+                stock > 0
+                    ? 'alerte alerte--info'
+                    : 'alerte alerte--danger'
+            }" style="margin-bottom:12px;">
+                ${
+                    stock > 0
+                        ? `Stock disponible : <strong>${stock} poussin(s)</strong>`
+                        : `Aucun poussin en stock actuellement. Enregistrez d'abord une livraison.`
+                }
             </div>
 
             <form onsubmit="PoussinsUI.soumettreVente(event)">
@@ -817,7 +849,7 @@ const PoussinsUI = {
                 <div class="champ">
                     <label>Quantité vendue</label>
                     <input type="number" name="quantite"
-                        min="1" step="1" placeholder="Ex : 100" required>
+                        min="1" max="${stock}" step="1" placeholder="Ex : 100" required>
                 </div>
 
                 <div class="champ">
@@ -846,7 +878,9 @@ const PoussinsUI = {
                     <input type="text" name="observation">
                 </div>
 
-                <button type="submit" class="btn btn-principal">
+                <button type="submit" class="btn btn-principal" ${
+                    stock <= 0 ? 'disabled' : ''
+                }>
                     Enregistrer la vente
                 </button>
 
